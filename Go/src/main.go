@@ -9,7 +9,14 @@ func main() {
 	router := gin.Default()
 
 	// define endpoints
+	// status
 	router.GET("/api/v2/assets/status", authors)
+
+	// buildings
+	
+	// storeys
+
+	// rooms
 
 	// start server
 	err := router.Run(":8081")
