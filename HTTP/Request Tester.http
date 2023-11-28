@@ -1,1 +1,1 @@
-localhost:5000/room?include_deleted=False
+localhost:5000/api/v2/assets/rooms?include_deleted=False
