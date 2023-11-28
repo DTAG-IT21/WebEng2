@@ -1,30 +1,23 @@
 from flask import Flask
+from flask import request
 from flask_restful import Resource, Api, reqparse
 import os
 import psycopg2
 
+import room
+
 app = Flask(__name__)
 api = Api(app)
-parser = reqparse.RequestParser()
-parser.add_argument('building_id')
 
 
-def get_db_connection():
-    conn = psycopg2.connect(host='localhost',
-                            database='RoomManager',
-                            user=os.environ['DB_USERNAME'],
-                            password=os.environ['DB_PASSWORD'])
-    return conn
-
-
-class Building:
+class Room(Resource):
 
     def get(self):
-        args = parser.parse_args()
-        conn = get_db_connection()
+        include_deleted = request.args.get("include_deleted")
+        return room.handle_get(include_deleted)
 
 
-api.add_resource(Building, '/building')
+api.add_resource(Room, 'api/v2/assets/rooms')
 
 if __name__ == '__main__':
     app.run(debug=True)
