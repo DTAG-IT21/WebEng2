@@ -16,8 +16,9 @@ class Room(Resource):
         return room.handle_get(include_deleted, storey_id)
 
     def post(self):
-        name = request.args.get("name")
-        storey_id = request.args.get("storey_id")
+        data = request.json
+        name = data.get("name")
+        storey_id = data.get("storey_id")
         return room.handle_post(name, storey_id)
 
 

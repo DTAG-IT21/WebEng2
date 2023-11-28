@@ -2,70 +2,76 @@ import json
 import uuid
 
 from flask import Response
-import distutils
 
 import database
 
-
-def handle_get(include_deleted, storey_id):
-    where = "True"
-    if not include_deleted == "True":
-        where = where + " and deleted_at is null"
-
-    if storey_id is not None:
-        where = where + " and storey_id = '" + storey_id + "'"
-
-    rows = database.select("*", "rooms", where)
-
-    response_dict = {
-        "rooms": []
-    }
-    for row in rows:
-        response_dict["rooms"].append({
-            "id": row[0],
-            "name": row[1],
-            "storey_id": row[2]
-        })
-
-    response = (json.dumps(
-        response_dict,
-        sort_keys=True,
+def create_response(data_dict, status=200):
+    response = json.dumps(
+        data_dict,
         indent=4,
         separators=(',', ': ')
-    ))
-    return Response(response, status=200, mimetype="application/json")
+    )
+    return Response(response, status=status, mimetype="application/json")
 
+def handle_get(include_deleted, storey_id):
+    where_clause = "True"
+    if include_deleted != "True":
+        where_clause += " and deleted_at is null"
 
-def handle_get_by_id(id):
-    # TODO
-    return
+    if storey_id is not None:
+        where_clause += f" and storey_id = '{storey_id}'"
 
+    rows = database.select("*", "rooms", where_clause)
+
+    rooms = [
+        {"id": id, "name": name, "storey_id": storey_id, "deleted_at": deleted_at} for id, name, storey_id, deleted_at in rows
+    ]
+
+    return create_response({"rooms": rooms})
 
 def handle_post(name, storey_id):
-    storeys = database.select(storey_id, "storeys", "storey_id = {}".format(storey_id))
-    if storey_id:
-        rooms = database.select("name", "rooms", "name = {}".format(name))
+    if storey_id is None or name is None:
+        response_body = {
+            "errors": [
+                {
+                    "code": "bad_request",
+                    "message": "Missing parameters",
+                    "more_info": "Handed parameters not sufficient"
+                }
+            ]
+        }
+        return create_response(response_body, 400)
+
+    storeys = database.select("id", "storeys", f"id = '{storey_id}'")
+
+    if storeys:
+        rooms = database.select("name", "rooms", f"storey_id = '{storey_id}' and name = '{name}'")
+
         if not rooms:
             room_id = uuid.uuid4()
-            database.insert("rooms", [room_id, name, storey_id, None])
-            response = {
-                "id": room_id,
+            database.insert("rooms", f"'{room_id}', '{name}', '{storey_id}', Null")
+
+            response_body = {
+                "id": str(room_id),
                 "name": name,
-                "storey:id": storey_id
+                "storey_id": str(storey_id)
             }
-            return Response(response, status=200)
+            return create_response(response_body)
+
         else:
-            response = {
+            response_body = {
                 "errors": [
                     {
                         "code": "bad_request",
                         "message": "Room name already in use",
                         "more_info": "The given room name is already in use"
-                    }]
+                    }
+                ]
             }
-        return Response(response, status=400, mimetype="application/json")
+            return create_response(response_body, 400)
+
     else:
-        response = {
+        response_body = {
             "errors": [
                 {
                     "code": "bad_request",
@@ -73,8 +79,12 @@ def handle_post(name, storey_id):
                     "more_info": "There is no storey with the given id"
                 }]
         }
-        return Response(response, status=400, mimetype="application/json")
+        return create_response(response_body, 400)
 
+
+def handle_get_by_id(id):
+    # TODO
+    return
 
 def handle_put_by_id(id):
     # TODO
