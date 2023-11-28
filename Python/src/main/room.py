@@ -2,15 +2,20 @@ import json
 import uuid
 
 from flask import Response
+import distutils
 
 import database
 
 
-def handle_get(include_deleted):
-    if include_deleted == "True":
-        rows = database.select("*", "rooms")
-    else:
-        rows = database.select("*", "rooms", "deleted_at is null")
+def handle_get(include_deleted, storey_id):
+    where = "True"
+    if not include_deleted == "True":
+        where = where + " and deleted_at is null"
+
+    if storey_id is not None:
+        where = where + " and storey_id = '" + storey_id + "'"
+
+    rows = database.select("*", "rooms", where)
 
     response_dict = {
         "rooms": []
@@ -29,6 +34,11 @@ def handle_get(include_deleted):
         separators=(',', ': ')
     ))
     return Response(response, status=200, mimetype="application/json")
+
+
+def handle_get_by_id(id):
+    # TODO
+    return
 
 
 def handle_post(name, storey_id):
@@ -64,3 +74,8 @@ def handle_post(name, storey_id):
                 }]
         }
         return Response(response, status=400, mimetype="application/json")
+
+
+def handle_put_by_id(id):
+    # TODO
+    return
