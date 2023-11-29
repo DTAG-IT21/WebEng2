@@ -3,6 +3,7 @@ from flask import request
 from flask_restful import Resource, Api
 
 import room
+import room_by_id
 
 app = Flask(__name__)
 api = Api(app)
@@ -23,21 +24,22 @@ class Room(Resource):
 
 
 class RoomById(Resource):
-    def get(self, id):
+
+    def get(self, room_id):
+        return room_by_id.handle_get(room_id)
+
+    def put(self, room_id):
         return
         # TODO
 
-    def put(self, id):
-        return
-        # TODO
-
-    def delete(self, id):
+    def delete(self, room_id):
         return
         # TODO
 
 
 api.add_resource(Room, '/api/v2/assets/rooms')
 api.add_resource(RoomById, '/api/v2/assets/rooms/<int:id>')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
