@@ -1,6 +1,4 @@
-from flask import Flask
-from flask import request
-from flask_restful import Resource, Api
+from flask import Flask, Resource, Api, request
 
 import room
 import room_by_id
