@@ -13,10 +13,17 @@ def create_response(data_dict, status=200):
 
 
 def error_response(message, more_info, status=400):
+    code = {
+        400: "bad_request",
+        401: "unauthorized",
+        404: "not_found"
+    }
+
     response_body = {
+
         "errors": [
             {
-                "code": "bad_request",
+                "code": code[status],
                 "message": message,
                 "more_info": more_info
             }

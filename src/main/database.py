@@ -38,3 +38,14 @@ def insert(table, values):
             query = f"""INSERT INTO {table} VALUES({values})"""
             cursor.execute(query)
             conn.commit()
+
+
+def update(table, values, where):
+    with get_connection() as conn:
+        with get_cursor(conn) as cursor:
+            query = f"""UPDATE {table} SET {values} WHERE({where})"""
+            cursor.execute(query)
+            conn.commit()
+            response = {
+
+            }

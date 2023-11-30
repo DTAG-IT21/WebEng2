@@ -45,11 +45,11 @@ def handle_post(name, storey_id):
             return response_generator.create_response(response_body)
 
         else:
-            message = "Room name already in use",
+            message = "Room name already in use"
             more_info = "The given room name is already in use"
             return response_generator.error_response(message, more_info, 400)
 
     else:
         message = "Storey not found"
         more_info = "There is no storey with the given id"
-        return response_generator.error_response(message, more_info, 400)
+        return response_generator.error_response(message, more_info, 404)
