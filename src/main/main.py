@@ -38,8 +38,7 @@ class RoomById(Resource):
         return room_by_id.handle_put(room_id, name, storey_id, deleted_at)
 
     def delete(self, room_id):
-        return
-        # TODO
+        return room_by_id.handle_delete(room_id)
 
 
 api.add_resource(Room, '/api/v2/assets/rooms')

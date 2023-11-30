@@ -20,7 +20,7 @@ def handle_get(include_deleted, storey_id):
         for room_id, name, storey_id in rows
     ]
 
-    return response_generator.create_response({"rooms": rooms})
+    return response_generator.response_body({"rooms": rooms})
 
 
 def handle_post(name, storey_id):
@@ -42,7 +42,7 @@ def handle_post(name, storey_id):
                 "name": name,
                 "storey_id": str(storey_id)
             }
-            return response_generator.create_response(response_body)
+            return response_generator.response_body(response_body)
 
         else:
             message = "Room name already in use"

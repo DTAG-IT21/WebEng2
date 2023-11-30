@@ -11,7 +11,7 @@ def handle_get(room_id):
         return response_generator.error_response(message, more_info, status=404)
 
     response_body = {"id": room[0][0], "name": room[0][1], "storey_id": room[0][2]}
-    return response_generator.create_response(response_body)
+    return response_generator.response_body(response_body)
 
 
 def handle_put(room_id, name, storey_id, deleted_at):
@@ -42,7 +42,7 @@ def handle_put(room_id, name, storey_id, deleted_at):
                 "name": name,
                 "storey_id": str(storey_id)
             }
-            return response_generator.create_response(response_body)
+            return response_generator.response_body(response_body)
         else:
             message = "Room not found"
             more_info = "Room not found or deleted. If you want to restore the room, pass deleted_at: null."
@@ -61,4 +61,17 @@ def handle_put(room_id, name, storey_id, deleted_at):
                 "name": name,
                 "storey_id": str(storey_id)
             }
-            return response_generator.create_response(response_body)
+            return response_generator.response_body(response_body)
+
+
+def handle_delete(room_id):
+    room = database.select("*", "rooms", f"id = '{room_id}' and deleted_at is null")
+    if room:
+        database.update("rooms",
+                        f"id = '{room[0][0]}', name = {room[0][1]}, storey_id = '{room[0][2]}, deleted_at = GETDATE()",
+                        f"id = '{room_id}'")
+        return response_generator.no_content()
+    else:
+        message = "Room not found"
+        more_info = "The requested room does not exist. Maybe it was already deleted?"
+        return response_generator.error_response(message, more_info, 404)

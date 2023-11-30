@@ -43,9 +43,15 @@ def insert(table, values):
 def update(table, values, where):
     with get_connection() as conn:
         with get_cursor(conn) as cursor:
-            query = f"""UPDATE {table} SET {values} WHERE({where})"""
+            query = f"""UPDATE {table} SET {values} WHERE {where}"""
             cursor.execute(query)
             conn.commit()
-            response = {
 
-            }
+
+def delete(table, where):
+    def update(table, values, where):
+        with get_connection() as conn:
+            with get_cursor(conn) as cursor:
+                query = f"""DELETE FROM {table} WHERE {where}"""
+                cursor.execute(query)
+                conn.commit()

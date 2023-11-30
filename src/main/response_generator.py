@@ -3,13 +3,17 @@ import json
 from flask import Response
 
 
-def create_response(data_dict, status=200):
-    response_body = json.dumps(
+def response_body(data_dict, status=200):
+    body = json.dumps(
         data_dict,
         indent=4,
         separators=(',', ': ')
     )
-    return Response(response_body, status=status, mimetype="application/json")
+    return Response(body, status=status, mimetype="application/json")
+
+
+def no_content(status=204):
+    return Response(status=status)
 
 
 def error_response(message, more_info, status=400):
@@ -19,7 +23,7 @@ def error_response(message, more_info, status=400):
         404: "not_found"
     }
 
-    response_body = {
+    body = {
 
         "errors": [
             {
@@ -29,4 +33,4 @@ def error_response(message, more_info, status=400):
             }
         ]
     }
-    return create_response(response_body, status=status)
+    return response_body(body, status=status)
