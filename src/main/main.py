@@ -78,9 +78,8 @@ class StoreyById(Resource):
 
 api.add_resource(Room, '/api/v2/assets/rooms')
 api.add_resource(RoomById, '/api/v2/assets/rooms/<string:room_id>')
-api.add_resource(Storey, 'api/v2/assets/storeys')
+api.add_resource(Storey, '/api/v2/assets/storeys')
 api.add_resource(StoreyById, '/api/v2/assets/storeys/<string:storey_id>')
-
 
 
 if __name__ == '__main__':
