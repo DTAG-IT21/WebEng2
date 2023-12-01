@@ -23,8 +23,8 @@ def handle_put(room_id, name, storey_id, deleted_at):
         return response_generator.error_response(message, more_info, status=404)
 
     # Check if room name is already in use
-    existing_room = database.select("id, name", "rooms", f"name='{name}' and storey_id = '{storey_id}'")
-    if existing_room and existing_room[0][0] != room_id:
+    existing_room = database.select("id, deleted_at", "rooms", f"name='{name}' and storey_id = '{storey_id}'")
+    if existing_room and (existing_room[0][0] != room_id or existing_room[0][1] is None):
         message = "Room name already used"
         more_info = "The given room name is already in use in the specified storey"
         return response_generator.error_response(message, more_info, status=400)

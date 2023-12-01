@@ -4,8 +4,9 @@ from contextlib import contextmanager
 
 @contextmanager
 def get_connection():
-    conn = psycopg2.connect(host='localhost',
-                            database='assets',
+    conn = psycopg2.connect(host=os.environ['DB_HOST'],
+                            port=os.environ['DB_PORT'],
+                            database=os.environ['DB_DATABASE'],
                             user=os.environ['DB_USERNAME'],
                             password=os.environ['DB_PASSWORD'])
     try:
