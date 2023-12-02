@@ -70,7 +70,7 @@ def handle_delete(storey_id):
         rooms = database.select("*", "rooms", f"storey_id = {storey_id}")
         if not rooms:
             database.update("storeys",
-                            f"id = '{storey[0][0]}', name = {storey[0][1]}, building_id = '{storey[0][2]}, deleted_at = GETDATE()",
+                            f"id = '{storey[0][0]}', name = {storey[0][1]}, building_id = '{storey[0][2]}, deleted_at = CURRENT_TIMESTAMP",
                             f"id = '{storey_id}'")
             return response_generator.no_content()
         else:

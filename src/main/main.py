@@ -5,6 +5,9 @@ import room
 import room_by_id
 import storey
 import storey_by_id
+import building
+import building_by_id
+
 
 app = Flask(__name__)
 api = Api(app)
@@ -76,10 +79,44 @@ class StoreyById(Resource):
         return storey_by_id.handle_delete(storey_id)
 
 
+class Building(Resource):
+    
+    def get(self):
+        include_deleted = request.args.get("include_deleted")
+        return building.handle_get(include_deleted)
+    
+    def post(self):
+        data = request.json
+        name = data.get("name")
+        address = data.get("address")
+        return building.handle_post(name, address)
+
+
+class BuildingById(Resource):
+
+    def get(self, building_id):
+        return building_by_id.handle_get(building_id)
+
+    def put(self, building_id):
+        data = request.json
+        name = data.get("name")
+        address = data.get("address")
+        if "deleted_at" in list(data.keys()):
+            deleted_at = None
+        else:
+            deleted_at = 1
+        return building_by_id.handle_put(building_id, name, address, deleted_at)
+
+    def delete(self, building_id):
+        return building_by_id.handle_delete(building_id)
+    
+
 api.add_resource(Room, '/api/v2/assets/rooms')
 api.add_resource(RoomById, '/api/v2/assets/rooms/<string:room_id>')
 api.add_resource(Storey, '/api/v2/assets/storeys')
 api.add_resource(StoreyById, '/api/v2/assets/storeys/<string:storey_id>')
+api.add_resource(Building, '/api/v2/assets/buildings')
+api.add_resource(BuildingById, '/api/v2/assets/buildings/<string:building_id>')
 
 
 if __name__ == '__main__':
