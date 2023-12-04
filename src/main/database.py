@@ -24,6 +24,14 @@ def get_cursor(conn):
         cursor.close()
 
 
+def test_connection():
+    try:
+        with get_connection():
+            return True
+    except psycopg2.OperationalError:
+        return False
+
+
 def select(columns, table, where="1 = 1"):
     with get_connection() as conn:
         with get_cursor(conn) as cursor:

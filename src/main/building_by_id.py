@@ -22,14 +22,14 @@ def handle_put(building_id, name, address, deleted_at):
         more_info = "The given Building name is already in use"
         return response_generator.error_response(message, more_info, status=400)
 
-    building = database.select("*", "buildings", f"id = '{building_id}' and address = '{address}'")
+    building = database.select("*", "buildings", f"id = '{building_id}'")
     # Check if building is deleted
     if building and building[0][3] is not None:
         # Check if building shall be restored
         if deleted_at is None:
             database.update("buildings",
                             f"id='{building_id}', name='{name}', address='{address}', deleted_at=null",
-                            f"id='{building_id}' and address='{address}'")
+                            f"id='{building_id}'")
             response_body = {
                 "id": str(building_id),
                 "name": name,
@@ -55,15 +55,26 @@ def handle_put(building_id, name, address, deleted_at):
                 "address": address
             }
             return response_generator.response_body(response_body)
+    else:
+        message = "Building not found"
+        more_info = "Building not found or deleted. If you want to restore the building, pass deleted_at: null."
+        return response_generator.error_response(message, more_info, status=404)
 
 
 def handle_delete(building_id):
     building = database.select("*", "buildings", f"id = '{building_id}' and deleted_at is null")
     if building:
-        database.update("buildings",
-                        f"id = '{building[0][0]}', name = {building[0][1]}, address = '{building[0][2]}, deleted_at = CURRENT_TIMESTAMP",
-                        f"id = '{building_id}'")
-        return response_generator.no_content()
+        storeys = database.select("*", "storeys", f"building_id = '{building_id}'")
+        if not storeys:
+            database.update("buildings",
+                            f"id = '{building[0][0]}', name = '{building[0][1]}', address = '{building[0][2]}', deleted_at = CURRENT_TIMESTAMP",
+                            f"id = '{building_id}'")
+            return response_generator.no_content()
+        else:
+            message = "Building cannot be deleted"
+            more_info = ("The given building still has active storeys. "
+                         "Please delete all corresponding storeys before deleting the building.")
+            return response_generator.error_response(message, more_info, 400)
     else:
         message = "Building not found"
         more_info = "The requested building does not exist. Maybe it was already deleted?"

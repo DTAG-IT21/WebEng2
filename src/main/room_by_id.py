@@ -62,13 +62,17 @@ def handle_put(room_id, name, storey_id, deleted_at):
                 "storey_id": str(storey_id)
             }
             return response_generator.response_body(response_body)
+    else:
+        message = "Bad Request"
+        more_info = "Room cannot be restored, as it is not deleted"
+        return response_generator.error_response(message, more_info, status=400)
 
 
 def handle_delete(room_id):
     room = database.select("*", "rooms", f"id = '{room_id}' and deleted_at is null")
     if room:
         database.update("rooms",
-                        f"id = '{room[0][0]}', name = {room[0][1]}, storey_id = '{room[0][2]}, deleted_at = CURRENT_TIMESTAMP",
+                        f"id = '{room[0][0]}', name = {room[0][1]}, storey_id = '{room[0][2]}', deleted_at = CURRENT_TIMESTAMP",
                         f"id = '{room_id}'")
         return response_generator.no_content()
     else:

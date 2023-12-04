@@ -1,5 +1,15 @@
+import json
+
 from flask import Flask
 from flask_restful import Resource, Api, request
+
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    get_jwt_identity
+)
+
+from keycloak import KeycloakOpenID
+import requests
 
 import room
 import room_by_id
@@ -7,117 +17,172 @@ import storey
 import storey_by_id
 import building
 import building_by_id
+import response_generator
+import database
 
 
-app = Flask(__name__)
-api = Api(app)
+def create_app():
+    app = Flask(__name__)
 
+    # Set up the Flask-JWT-Extended extension
+    app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
+    jwt = JWTManager(app)
 
-class Room(Resource):
+    keycloak_openid = KeycloakOpenID(server_url="http://localhost:8080/auth/",
+                                     client_id="example_client",
+                                     realm_name="example_realm",
+                                     client_secret_key="secret_key")
 
-    def get(self):
-        include_deleted = request.args.get("include_deleted")
-        storey_id = request.args.get("storey_id")
-        return room.handle_get(include_deleted, storey_id)
+    api = Api(app)
 
-    def post(self):
-        data = request.json
-        name = data.get("name")
-        storey_id = data.get("storey_id")
-        return room.handle_post(name, storey_id)
+    class Room(Resource):
 
+        def get(self):
+            include_deleted = request.args.get("include_deleted")
+            storey_id = request.args.get("storey_id")
+            return room.handle_get(include_deleted, storey_id)
 
-class RoomById(Resource):
+        def post(self):
+            data = request.json
+            name = data.get("name")
+            storey_id = data.get("storey_id")
+            return room.handle_post(name, storey_id)
 
-    def get(self, room_id):
-        return room_by_id.handle_get(room_id)
+    class RoomById(Resource):
 
-    def put(self, room_id):
-        data = request.json
-        name = data.get("name")
-        storey_id = data.get("storey_id")
-        if "deleted_at" in list(data.keys()):
-            deleted_at = None
+        def get(self, room_id):
+            return room_by_id.handle_get(room_id)
+
+        def put(self, room_id):
+            data = request.json
+            name = data.get("name")
+            storey_id = data.get("storey_id")
+            if "deleted_at" in list(data.keys()):
+                deleted_at = None
+            else:
+                deleted_at = 1
+            return room_by_id.handle_put(room_id, name, storey_id, deleted_at)
+
+        def delete(self, room_id):
+            return room_by_id.handle_delete(room_id)
+
+    class Storey(Resource):
+
+        def get(self):
+            include_deleted = request.args.get("include_deleted")
+            building_id = request.args.get("building_id")
+            return storey.handle_get(include_deleted, building_id)
+
+        def post(self):
+            data = request.json
+            name = data.get("name")
+            building_id = data.get("building_id")
+            return room.handle_post(name, building_id)
+
+    class StoreyById(Resource):
+
+        def get(self, storey_id):
+            return storey_by_id.handle_get(storey_id)
+
+        def put(self, storey_id):
+            data = request.json
+            name = data.get("name")
+            building_id = data.get("building_id")
+            if "deleted_at" in list(data.keys()):
+                deleted_at = None
+            else:
+                deleted_at = 1
+            return storey_by_id.handle_put(storey_id, name, building_id, deleted_at)
+
+        def delete(self, storey_id):
+            return storey_by_id.handle_delete(storey_id)
+
+    class Building(Resource):
+
+        def get(self):
+            include_deleted = request.args.get("include_deleted")
+            return building.handle_get(include_deleted)
+
+        def post(self):
+            data = request.json
+            name = data.get("name")
+            address = data.get("address")
+            return building.handle_post(name, address)
+
+    class BuildingById(Resource):
+
+        def get(self, building_id):
+            return building_by_id.handle_get(building_id)
+
+        def put(self, building_id):
+            data = request.json
+            name = data.get("name")
+            address = data.get("address")
+            if "deleted_at" in list(data.keys()):
+                deleted_at = None
+            else:
+                deleted_at = 1
+            return building_by_id.handle_put(building_id, name, address, deleted_at)
+
+        def delete(self, building_id):
+            return building_by_id.handle_delete(building_id)
+
+    @app.route('/api/v2/assets/status')
+    def status():
+        response = {
+            "authors": [
+                "Nico Merkel",
+                "Leon Richter"
+            ],
+            "api_version": "2.0.0"
+        }
+        return response_generator.response_body(response, 200)
+
+    @app.route('/api/v2/assets/health/ready', methods=['GET'])
+    def ready():
+        response = {
+            "ready": True
+        }
+        return response_generator.response_body(response, 200)
+
+    @app.route('/api/v2/assets/health/live', methods=['GET'])
+    def live():
+        if database.test_connection():
+            return response_generator.response_body({'live': True}, 200)
         else:
-            deleted_at = 1
-        return room_by_id.handle_put(room_id, name, storey_id, deleted_at)
+            response = {
+                'live': False,
+            }
+            return response_generator.response_body(response, 500)
 
-    def delete(self, room_id):
-        return room_by_id.handle_delete(room_id)
+    @app.route('/api/v2/assets/health', methods=['GET'])
+    def health():
+        is_ready = ready().get_json()
+        is_live = live().get_json()
 
+        is_ready = is_ready['ready']
+        is_live = is_live['live']
 
-class Storey(Resource):
+        response = {
+            'ready': is_ready,
+            'live': is_live
+        }
 
-    def get(self):
-        include_deleted = request.args.get("include_deleted")
-        building_id = request.args.get("building_id")
-        return storey.handle_get(include_deleted, building_id)
-
-    def post(self):
-        data = request.json
-        name = data.get("name")
-        building_id = data.get("building_id")
-        return room.handle_post(name, building_id)
-
-
-class StoreyById(Resource):
-
-    def get(self, storey_id):
-        return storey_by_id.handle_get(storey_id)
-
-    def put(self, storey_id):
-        data = request.json
-        name = data.get("name")
-        building_id = data.get("building_id")
-        if "deleted_at" in list(data.keys()):
-            deleted_at = None
+        if not is_ready or not is_live:
+            return response_generator.response_body(response, 500)
         else:
-            deleted_at = 1
-        return storey_by_id.handle_put(storey_id, name, building_id, deleted_at)
+            return response_generator.response_body(response, 200)
 
-    def delete(self, storey_id):
-        return storey_by_id.handle_delete(storey_id)
+    api.add_resource(Room, '/api/v2/assets/rooms')
+    api.add_resource(RoomById, '/api/v2/assets/rooms/<string:room_id>')
+    api.add_resource(Storey, '/api/v2/assets/storeys')
+    api.add_resource(StoreyById, '/api/v2/assets/storeys/<string:storey_id>')
+    api.add_resource(Building, '/api/v2/assets/buildings')
+    api.add_resource(BuildingById, '/api/v2/assets/buildings/<string:building_id>')
 
-
-class Building(Resource):
-    
-    def get(self):
-        include_deleted = request.args.get("include_deleted")
-        return building.handle_get(include_deleted)
-    
-    def post(self):
-        data = request.json
-        name = data.get("name")
-        address = data.get("address")
-        return building.handle_post(name, address)
-
-
-class BuildingById(Resource):
-
-    def get(self, building_id):
-        return building_by_id.handle_get(building_id)
-
-    def put(self, building_id):
-        data = request.json
-        name = data.get("name")
-        address = data.get("address")
-        if "deleted_at" in list(data.keys()):
-            deleted_at = None
-        else:
-            deleted_at = 1
-        return building_by_id.handle_put(building_id, name, address, deleted_at)
-
-    def delete(self, building_id):
-        return building_by_id.handle_delete(building_id)
-    
-
-api.add_resource(Room, '/api/v2/assets/rooms')
-api.add_resource(RoomById, '/api/v2/assets/rooms/<string:room_id>')
-api.add_resource(Storey, '/api/v2/assets/storeys')
-api.add_resource(StoreyById, '/api/v2/assets/storeys/<string:storey_id>')
-api.add_resource(Building, '/api/v2/assets/buildings')
-api.add_resource(BuildingById, '/api/v2/assets/buildings/<string:building_id>')
+    return app
 
 
 if __name__ == '__main__':
+    app = create_app()
     app.run(debug=True)

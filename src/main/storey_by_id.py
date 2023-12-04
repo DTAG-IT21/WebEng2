@@ -62,15 +62,19 @@ def handle_put(storey_id, name, building_id, deleted_at):
                 "building_id": str(building_id)
             }
             return response_generator.response_body(response_body)
+    else:
+        message = "storey not found"
+        more_info = "storey not found or deleted. If you want to restore the storey, pass deleted_at: null."
+        return response_generator.error_response(message, more_info, status=404)
 
 
 def handle_delete(storey_id):
     storey = database.select("*", "storeys", f"id = '{storey_id}' and deleted_at is null")
     if storey:
-        rooms = database.select("*", "rooms", f"storey_id = {storey_id}")
+        rooms = database.select("*", "rooms", f"storey_id = '{storey_id}'")
         if not rooms:
             database.update("storeys",
-                            f"id = '{storey[0][0]}', name = {storey[0][1]}, building_id = '{storey[0][2]}, deleted_at = CURRENT_TIMESTAMP",
+                            f"id = '{storey[0][0]}', name = {storey[0][1]}, building_id = '{storey[0][2]}', deleted_at = CURRENT_TIMESTAMP",
                             f"id = '{storey_id}'")
             return response_generator.no_content()
         else:
