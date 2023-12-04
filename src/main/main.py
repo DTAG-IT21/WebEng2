@@ -1,9 +1,14 @@
+import os
+from base64 import b64decode
+
+import requests
 from flask import Flask
 from flask_restful import Resource, Api, request
 
 from flask_jwt_extended import (
     JWTManager
 )
+from jose import jwt
 
 from keycloak import KeycloakOpenID
 
@@ -15,16 +20,29 @@ import database
 def create_app():
     app = Flask(__name__)
 
-    # Set up the Flask-JWT-Extended extension
-    app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
-    jwt = JWTManager(app)
-
-    keycloak_openid = KeycloakOpenID(server_url="http://localhost:8080/auth/",
-                                     client_id="example_client",
-                                     realm_name="example_realm",
-                                     client_secret_key="secret_key")
-
     api = Api(app)
+
+    keycloak_url = f'http://{os.getenv("KEYCLOAK_HOST")}/auth/realms/{os.getenv("KEYCLOAK_REALM")}'
+
+    @app.route('/api/v2/assets/verify', methods=["POST"])
+    def verify_token():
+        token = request.json['token']
+        public_key = get_keycloak_public_key()
+
+        try:
+            payload = jwt.decode(token, public_key, algorithms=['RS256'])
+            return payload, 200
+        except Exception as e:
+            return str(e), 400
+
+    def get_keycloak_public_key():
+        response = requests.get(f'{keycloak_url}')
+
+        public_key_data = response.json()['public_key']
+        print(public_key_data)
+        public_key = f"-----BEGIN PUBLIC KEY-----\n{public_key_data}\n-----END PUBLIC KEY-----"
+
+        return public_key
 
     class Room(Resource):
 
@@ -118,7 +136,7 @@ def create_app():
         def delete(self, building_id):
             return building_by_id.handle_delete(building_id)
 
-    @app.route('/api/v2/assets/status')
+    @app.route('/api/v2/assets/status', methods=['GET'])
     def status():
         response = {
             "authors": [
