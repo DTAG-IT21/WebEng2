@@ -1,7 +1,7 @@
 import uuid
 
-import database
-import response_generator
+import src.main.database as database
+import src.main.response_generator as response_generator
 
 
 def handle_get(include_deleted):

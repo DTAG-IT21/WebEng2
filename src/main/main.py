@@ -1,22 +1,13 @@
-import json
-
 from flask import Flask
 from flask_restful import Resource, Api, request
 
 from flask_jwt_extended import (
-    JWTManager, jwt_required, create_access_token,
-    get_jwt_identity
+    JWTManager
 )
 
 from keycloak import KeycloakOpenID
-import requests
 
-import room
-import room_by_id
-import storey
-import storey_by_id
-import building
-import building_by_id
+from src.assets import storey, building, room_by_id, room, storey_by_id, building_by_id
 import response_generator
 import database
 
