@@ -1,4 +1,4 @@
-POST http://localhost:5000/api/v2/assets/rooms
+POST http://localhost:9090/api/v2/assets/rooms
 Content-Type: application/json
 Accept: application/json
 
