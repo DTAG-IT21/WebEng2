@@ -4,7 +4,7 @@ from contextlib import contextmanager
 
 @contextmanager
 def get_connection():
-    conn = psycopg2.connect(host='10.244.0.13',
+    conn = psycopg2.connect(host=os.environ['POSTGRES_ASSETS_HOST'],
                             port=os.environ['POSTGRES_ASSETS_PORT'],
                             database=os.environ['POSTGRES_ASSETS_DBNAME'],
                             user=os.environ['POSTGRES_ASSETS_USER'],
@@ -28,8 +28,8 @@ def test_connection():
     try:
         with get_connection():
             return True
-    except psycopg2.OperationalError:
-        return False
+    except psycopg2.OperationalError as e:
+        return e
 
 
 def select(columns, table, where="1 = 1"):
