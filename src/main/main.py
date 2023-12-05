@@ -187,4 +187,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, port=os.getenv("API_PORT"))
+    app.run(debug=True, host="localhost", port=5000)

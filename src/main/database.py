@@ -4,11 +4,11 @@ from contextlib import contextmanager
 
 @contextmanager
 def get_connection():
-    conn = psycopg2.connect(host=os.environ['DB_HOST'],
-                            port=os.environ['DB_PORT'],
-                            database=os.environ['DB_DATABASE'],
-                            user=os.environ['DB_USERNAME'],
-                            password=os.environ['DB_PASSWORD'])
+    conn = psycopg2.connect(host=os.environ['POSTGRES_ASSETS_HOST'],
+                            port=os.environ['POSTGRES_ASSETS_PORT'],
+                            database=os.environ['POSTGRES_ASSETS_DBNAME'],
+                            user=os.environ['POSTGRES_ASSETS_USER'],
+                            password=os.environ['POSTGRES_ASSETS_PASSWORD'])
     try:
         yield conn
     finally:

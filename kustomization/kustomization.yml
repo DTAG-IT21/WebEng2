@@ -7,7 +7,7 @@ patches:
   - patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: ghcr.io/dtag-it21/webeng2:sha-28678dd
+        value: ghcr.io/dtag-it21/webeng2:main
     target:
       group: apps
       version: v1
