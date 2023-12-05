@@ -12,4 +12,4 @@ ENV KEYCLOAK_HOST=localhost:8080
 ENV KEYCLOAK_REALM=biletado
 ENV PYTHONUNBUFFERED=1
 
-CMD [ "python","-m", "src/main" ]
+CMD [ "python","-m", "src.main" ]
