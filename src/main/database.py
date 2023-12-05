@@ -4,7 +4,7 @@ from contextlib import contextmanager
 
 @contextmanager
 def get_connection():
-    conn = psycopg2.connect(host=os.environ['POSTGRES_ASSETS_HOST'],
+    conn = psycopg2.connect(host='localhost',
                             port=os.environ['POSTGRES_ASSETS_PORT'],
                             database=os.environ['POSTGRES_ASSETS_DBNAME'],
                             user=os.environ['POSTGRES_ASSETS_USER'],
