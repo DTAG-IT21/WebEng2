@@ -6,7 +6,7 @@ from flask import Flask
 from flask_restful import Resource, Api, request
 from jose import jwt
 
-sys.path.insert(0, '../src')
+sys.path.append('../src')
 from src.assets import room, room_by_id, storey, storey_by_id, building, building_by_id
 import response_generator
 import database
