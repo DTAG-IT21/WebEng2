@@ -1,18 +1,13 @@
 import os
-from base64 import b64decode
+import sys
 
 import requests
 from flask import Flask
 from flask_restful import Resource, Api, request
-
-from flask_jwt_extended import (
-    JWTManager
-)
 from jose import jwt
 
-from keycloak import KeycloakOpenID
-
-from src.assets import storey, building, room_by_id, room, storey_by_id, building_by_id
+sys.path.insert(0, '../src')
+from src.assets import room, room_by_id, storey, storey_by_id, building, building_by_id
 import response_generator
 import database
 
