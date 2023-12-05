@@ -10,7 +10,7 @@ patches:
         value: ghcr.io/dtag-it21/webeng2:main
       - op: replace
         path: /spec/template/spec/containers/0/ports/0/containerPort
-        value: 5000
+        value: 9090
 
     target:
       group: apps
