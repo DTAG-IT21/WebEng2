@@ -187,5 +187,5 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=False, host=os.getenv("API_HOST"), port=os.getenv("API_PORT"))
+    app.run(debug=False, host="localhost", port=9000)
 

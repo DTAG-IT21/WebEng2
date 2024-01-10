@@ -3,8 +3,6 @@ ADD requirements.txt .
 RUN pip install -r requirements.txt
 COPY src src
 
-ENV API_HOST=localhost
-ENV API_PORT=9000
 ENV DB_DATABASE=assets
 ENV DB_HOST=localhost
 ENV DB_PASSWORD=postgres
