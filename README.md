@@ -10,7 +10,7 @@
 
  See [fantasy name generators](httpswww.fantasynamegenerators.com)
 
-Gruppenname Covfefe
+Gruppenname: Covfefe
 
 Gruppenteilnehmer
 

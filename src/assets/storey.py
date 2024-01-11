@@ -1,47 +1,65 @@
-import uuid
-
-import src.main.database as database
 import src.main.response_generator as response_generator
+from src.DAO.building_dao import BuildingDAO
+from src.DAO.storey_dao import StoreyDAO
+from src.DAO.base import Session
+from sqlalchemy import and_
+
+session = Session()
 
 
 def handle_get(include_deleted, building_id):
 
-    where_clause = "True"
-    if include_deleted != "True":
-        where_clause += " and deleted_at is null"
-
     if building_id is not None:
-        where_clause += f" and building_id = '{building_id}'"
-
-    rows = database.select("id, name, building_id", "storeys", where_clause)
+        if include_deleted == "true":
+            storeys = session.query(StoreyDAO) \
+                .filter(StoreyDAO.building_id == building_id) \
+                .all()
+        else:
+            storeys = session.query(StoreyDAO) \
+                .filter(and_(StoreyDAO.deleted_at.is_(None),
+                        StoreyDAO.building_id == building_id)) \
+                .all()
+    else:
+        if include_deleted == "true":
+            storeys = session.query(StoreyDAO) \
+                .all()
+        else:
+            storeys = session.query(StoreyDAO) \
+                .filter(StoreyDAO.deleted_at.is_(None)) \
+                .all()
 
     storeys = [
-        {"id": storey_id, "name": name, "building_id": building_id}
-        for storey_id, name, building_id in rows
+        {"id": str(s.id), "name": s.name, "building_id": str(s.building_id)}
+        for s in storeys
     ]
 
     return response_generator.response_body({"storeys": storeys})
 
 
 def handle_post(name, building_id):
-
     if building_id is None or name is None:
         message = "Missing parameters"
         more_info = "Handed parameters not sufficient"
         return response_generator.error_response(message, more_info, 400)
 
-    buildings = database.select("id", "buildings", f"id = '{building_id}'")
+    buildings = session.query(BuildingDAO) \
+        .filter(BuildingDAO.id == building_id) \
+        .all()
     if buildings:
-        storeys = database.select("name", "storeys", f"building_id = '{building_id}' and name = '{name}'")
+        storeys = session.query(StoreyDAO) \
+            .filter(and_(StoreyDAO.building_id == building_id,
+                         StoreyDAO.name == name)) \
+            .all()
         if not storeys:
-            storey_id = uuid.uuid4()
-            database.insert("storeys", f"'{storey_id}', '{name}', '{building_id}', Null")
+            new_storey = StoreyDAO(name=name, building_id=building_id, deleted_at=None)
+            session.add(new_storey)
 
             response_body = {
-                "id": str(storey_id),
-                "name": name,
-                "storey_id": str(building_id)
+                "id": str(new_storey.id),
+                "name": new_storey.name,
+                "storey_id": str(new_storey.building_id)
             }
+            session.commit()
             return response_generator.response_body(response_body)
 
         else:

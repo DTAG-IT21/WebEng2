@@ -30,3 +30,4 @@ six==1.16.0
 urllib3==2.1.0
 Werkzeug==3.0.1
 path~=16.9.0
+SQLAlchemy~=2.0.25

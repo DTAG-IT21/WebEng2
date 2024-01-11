@@ -79,7 +79,7 @@ def create_app():
             data = request.json
             name = data.get("name")
             building_id = data.get("building_id")
-            return room.handle_post(name, building_id)
+            return storey.handle_post(name, building_id)
 
     class StoreyById(Resource):
 
@@ -187,5 +187,5 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=False, host="localhost", port=9000)
+    app.run(debug=True, host="localhost", port=9000)
 
