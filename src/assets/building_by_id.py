@@ -1,59 +1,75 @@
-import src.main.database as database
+import datetime
+
+from sqlalchemy import or_, and_
+
 import src.main.response_generator as response_generator
+from src.DAO.base import Session
+from src.DAO.building_dao import BuildingDAO
+from src.DAO.storey_dao import StoreyDAO
+
+session = Session()
 
 
 def handle_get(building_id):
-
-    building = database.select("id, name, address", "buildings", f"id = '{building_id}'")
+    building = session.query(BuildingDAO).get(building_id)
     if not building:
         message = "Building not found",
         more_info = "No building with the given id found"
         return response_generator.error_response(message, more_info, status=404)
 
-    response_body = {"id": building[0][0], "name": building[0][1], "address": building[0][2]}
+    response_body = {"id": str(building.id), "name": building.name, "address": building.address}
     return response_generator.response_body(response_body)
 
 
 def handle_put(building_id, name, address, deleted_at):
     # Check if building name is already in use
-    existing_building = database.select("id, deleted_at", "buildings", f"name='{name}' and address = '{address}'")
-    if existing_building and (existing_building[0][0] != building_id or existing_building[0][1] is None):
-        message = "Building name already used"
-        more_info = "The given Building name is already in use"
+    existing_buildings = session.query(BuildingDAO) \
+        .filter(and_(or_(BuildingDAO.name == name,
+                         BuildingDAO.address == address)),
+                BuildingDAO.deleted_at.is_(None)) \
+        .all()
+    if existing_buildings:
+        message = "Building name or address already used"
+        more_info = "The given Building name or address are already in use"
         return response_generator.error_response(message, more_info, status=400)
 
-    building = database.select("*", "buildings", f"id = '{building_id}'")
-    # Check if building is deleted
-    if building and building[0][3] is not None:
-        # Check if building shall be restored
-        if deleted_at is None:
-            database.update("buildings",
-                            f"id='{building_id}', name='{name}', address='{address}', deleted_at=null",
-                            f"id='{building_id}'")
-            response_body = {
-                "id": str(building_id),
-                "name": name,
-                "address": address
-            }
-            return response_generator.response_body(response_body)
-        else:
-            message = "Building not found"
-            more_info = "Building not found or deleted. If you want to restore the building, pass deleted_at: null."
-            return response_generator.error_response(message, more_info, status=404)
-    elif building:
-        if deleted_at is None:
+    building = session.query(BuildingDAO).get(building_id)
+    # Check if building exists
+    if building:
+        # Check if building is deleted
+        if building.deleted_at:
+            # Check if building shall be restored
+            if not deleted_at:
+                building.name = name
+                building.address = address
+                building.deleted_at = None
+
+                response_body = {
+                    "id": str(building.id),
+                    "name": building.name,
+                    "address": building.address
+                }
+                session.commit()
+                return response_generator.response_body(response_body)
+            else:
+                message = "Building not found"
+                more_info = "Building not found or deleted. If you want to restore the building, pass deleted_at: null."
+                return response_generator.error_response(message, more_info, status=404)
+        # Check if building shall be restored (although not deleted)
+        elif not deleted_at:
             message = "Bad Request"
             more_info = "Building cannot be restored, as it is not deleted"
             return response_generator.error_response(message, more_info, status=400)
         else:
-            database.update("buildings",
-                            f"id='{building_id}', name='{name}', address='{address}', deleted_at=null",
-                            f"id='{building_id}' and address='{address}'")
+            building.name = name
+            building.address = address
+
             response_body = {
-                "id": str(building_id),
-                "name": name,
-                "address": address
+                "id": str(building.id),
+                "name": building.name,
+                "address": building.address
             }
+            session.commit()
             return response_generator.response_body(response_body)
     else:
         message = "Building not found"
@@ -62,13 +78,15 @@ def handle_put(building_id, name, address, deleted_at):
 
 
 def handle_delete(building_id):
-    building = database.select("*", "buildings", f"id = '{building_id}' and deleted_at is null")
-    if building:
-        storeys = database.select("*", "storeys", f"building_id = '{building_id}'")
+    building = session.query(BuildingDAO).get(building_id)
+    if building and not building.deleted_at:
+        storeys = session.query(StoreyDAO) \
+            .filter(StoreyDAO.building_id == building_id) \
+            .all()
+        print(storeys)
         if not storeys:
-            database.update("buildings",
-                            f"id = '{building[0][0]}', name = '{building[0][1]}', address = '{building[0][2]}', deleted_at = CURRENT_TIMESTAMP",
-                            f"id = '{building_id}'")
+            building.deleted_at = datetime.datetime.now()
+            session.commit()
             return response_generator.no_content()
         else:
             message = "Building cannot be deleted"

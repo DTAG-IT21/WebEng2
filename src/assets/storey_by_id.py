@@ -42,23 +42,23 @@ def handle_put(storey_id, name, building_id, deleted_at):
         more_info = "The given storey name is already in use in the specified building"
         return response_generator.error_response(message, more_info, status=400)
 
-    updated_storey = session.query(StoreyDAO).get(storey_id)
+    storey = session.query(StoreyDAO).get(storey_id)
     # Check if storey exists
-    if updated_storey:
+    if storey:
         # Check if storey was deleted
-        if updated_storey.deleted_at is not None:
+        if storey.deleted_at is not None:
             # Check if storey shall be restored
             if deleted_at is None:
-                updated_storey.name = name
-                updated_storey.building_id = building_id
-                updated_storey.deleted_at = None
-                session.commit()
+                storey.name = name
+                storey.building_id = building_id
+                storey.deleted_at = None
 
                 response_body = {
                     "id": str(storey_id),
                     "name": name,
                     "building_id": str(building_id)
                 }
+                session.commit()
                 return response_generator.response_body(response_body)
             else:
                 message = "storey not found"
@@ -71,15 +71,15 @@ def handle_put(storey_id, name, building_id, deleted_at):
             return response_generator.error_response(message, more_info, status=400)
         # Update Storey
         else:
-            updated_storey.name = name
-            updated_storey.building_id = building_id
-            session.commit()
+            storey.name = name
+            storey.building_id = building_id
 
             response_body = {
                 "id": str(storey_id),
                 "name": name,
                 "building_id": str(building_id)
             }
+            session.commit()
             return response_generator.response_body(response_body)
     else:
         message = "storey not found"

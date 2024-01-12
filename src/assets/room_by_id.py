@@ -40,23 +40,23 @@ def handle_put(room_id, name, storey_id, deleted_at):
         more_info = "The given room name is already in use in the specified storey"
         return response_generator.error_response(message, more_info, status=400)
 
-    updated_room = session.query(RoomDAO).get(room_id)
+    room = session.query(RoomDAO).get(room_id)
     # Check if room exists
-    if updated_room:
+    if room:
         # Check if room was deleted
-        if updated_room.deleted_at is not None:
+        if room.deleted_at is not None:
             # Check if room shall be restored
             if deleted_at is None:
-                updated_room.name = name
-                updated_room.building_id = storey_id
-                updated_room.deleted_at = None
-                session.commit()
+                room.name = name
+                room.building_id = storey_id
+                room.deleted_at = None
 
                 response_body = {
                     "id": str(room_id),
                     "name": name,
                     "building_id": str(storey_id)
                 }
+                session.commit()
                 return response_generator.response_body(response_body)
             else:
                 message = "room not found"
@@ -69,15 +69,15 @@ def handle_put(room_id, name, storey_id, deleted_at):
             return response_generator.error_response(message, more_info, status=400)
         # Update room
         else:
-            updated_room.name = name
-            updated_room.storey_id = storey_id
-            session.commit()
+            room.name = name
+            room.storey_id = storey_id
 
             response_body = {
                 "id": str(room_id),
                 "name": name,
                 "storey_id": str(storey_id)
             }
+            session.commit()
             return response_generator.response_body(response_body)
     else:
         message = "room not found"
