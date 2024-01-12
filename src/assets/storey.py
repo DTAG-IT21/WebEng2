@@ -9,7 +9,7 @@ session = Session()
 
 def handle_get(include_deleted, building_id):
 
-    if building_id is not None:
+    if building_id:
         if include_deleted == "true":
             storeys = session.query(StoreyDAO) \
                 .filter(StoreyDAO.building_id == building_id) \
@@ -28,23 +28,21 @@ def handle_get(include_deleted, building_id):
                 .filter(StoreyDAO.deleted_at.is_(None)) \
                 .all()
 
-    storeys = [
+    output = [
         {"id": str(s.id), "name": s.name, "building_id": str(s.building_id)}
         for s in storeys
     ]
 
-    return response_generator.response_body({"storeys": storeys})
+    return response_generator.response_body({"storeys": output})
 
 
 def handle_post(name, building_id):
-    if building_id is None or name is None:
+    if not building_id or not name:
         message = "Missing parameters"
         more_info = "Handed parameters not sufficient"
         return response_generator.error_response(message, more_info, 400)
 
-    buildings = session.query(BuildingDAO) \
-        .filter(BuildingDAO.id == building_id) \
-        .all()
+    buildings = session.query(BuildingDAO).get(building_id)
     if buildings:
         storeys = session.query(StoreyDAO) \
             .filter(and_(StoreyDAO.building_id == building_id,

@@ -1,23 +1,39 @@
 import uuid
 
-import src.main.database as database
 import src.main.response_generator as response_generator
+from src.DAO.building_dao import BuildingDAO
+from src.DAO.storey_dao import StoreyDAO
+from src.DAO.room_dao import RoomDao, RoomDAO
+from src.DAO.base import Session
+from sqlalchemy import and_
+
+session = Session()
 
 
 def handle_get(include_deleted, storey_id):
 
-    where_clause = "True"
-    if include_deleted != "True":
-        where_clause += " and deleted_at is null"
+    if storey_id:
+        if include_deleted == "true":
+            rooms = session.query(RoomDAO) \
+                .filter(RoomDAO.building_id == storey_id) \
+                .all()
+        else:
+            rooms = session.query(RoomDAO) \
+                .filter(and_(RoomDAO.deleted_at.is_(None),
+                             RoomDAO.building_id == storey_id)) \
+                .all()
+    else:
+        if include_deleted == "true":
+            rooms = session.query(RoomDAO) \
+                .all()
+        else:
+            rooms = session.query(RoomDAO) \
+                .filter(RoomDAO.deleted_at.is_(None)) \
+                .all()
 
-    if storey_id is not None:
-        where_clause += f" and storey_id = '{storey_id}'"
-
-    rows = database.select("id, name, storey_id", "rooms", where_clause)
-
-    rooms = [
-        {"id": room_id, "name": name, "storey_id": storey_id}
-        for room_id, name, storey_id in rows
+    output = [
+        {"id": room.id, "name": room.name, "storey_id": room.storey_id}
+        for room in rooms
     ]
 
     return response_generator.response_body({"rooms": rooms})
@@ -25,22 +41,23 @@ def handle_get(include_deleted, storey_id):
 
 def handle_post(name, storey_id):
 
-    if storey_id is None or name is None:
+    if not storey_id or not name:
         message = "Missing parameters"
         more_info = "Handed parameters not sufficient"
         return response_generator.error_response(message, more_info, 400)
 
-    storeys = database.select("id", "storeys", f"id = '{storey_id}'")
+    storeys = session.query(StoreyDAO).get(storey_id)
     if storeys:
-        rooms = database.select("name", "rooms", f"storey_id = '{storey_id}' and name = '{name}'")
+        rooms = session.query(RoomDao) \
+            .filter(and_(RoomDAO.storey_id == storey_id,
+                         RoomDAO.name == name))
         if not rooms:
-            room_id = uuid.uuid4()
-            database.insert("rooms", f"'{room_id}', '{name}', '{storey_id}', Null")
+            new_room = RoomDAO(name=name, storey_id=storey_id, deleted_at=None)
 
             response_body = {
-                "id": str(room_id),
-                "name": name,
-                "storey_id": str(storey_id)
+                "id": str(new_room.id),
+                "name": new_room.name,
+                "storey_id": str(new_room.storey_id)
             }
             return response_generator.response_body(response_body)
 
