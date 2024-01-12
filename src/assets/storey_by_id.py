@@ -1,8 +1,5 @@
 import datetime
 
-import src.main.database as database
-import src.main.response_generator as response_generator
-
 import src.main.response_generator as response_generator
 from src.DAO.building_dao import BuildingDAO
 from src.DAO.room_dao import RoomDAO
@@ -91,11 +88,8 @@ def handle_put(storey_id, name, building_id, deleted_at):
 
 
 def handle_delete(storey_id):
-    storey = session.query(StoreyDAO) \
-        .filter(and_(StoreyDAO.id == storey_id,
-                     StoreyDAO.deleted_at.is_(None))) \
-        .first()
-    if storey:
+    storey = session.query(StoreyDAO).get(storey_id)
+    if storey.deleted_at is None:
         rooms = session.query(RoomDAO) \
             .filter(RoomDAO.storey_id == storey_id) \
             .all()

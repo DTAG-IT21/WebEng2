@@ -3,7 +3,7 @@ import uuid
 import src.main.response_generator as response_generator
 from src.DAO.building_dao import BuildingDAO
 from src.DAO.storey_dao import StoreyDAO
-from src.DAO.room_dao import RoomDao, RoomDAO
+from src.DAO.room_dao import RoomDAO
 from src.DAO.base import Session
 from sqlalchemy import and_
 
@@ -20,7 +20,7 @@ def handle_get(include_deleted, storey_id):
         else:
             rooms = session.query(RoomDAO) \
                 .filter(and_(RoomDAO.deleted_at.is_(None),
-                             RoomDAO.building_id == storey_id)) \
+                             RoomDAO.storey_id == storey_id)) \
                 .all()
     else:
         if include_deleted == "true":
@@ -32,11 +32,10 @@ def handle_get(include_deleted, storey_id):
                 .all()
 
     output = [
-        {"id": room.id, "name": room.name, "storey_id": room.storey_id}
+        {"id": str(room.id), "name": room.name, "storey_id": str(room.storey_id)}
         for room in rooms
     ]
-
-    return response_generator.response_body({"rooms": rooms})
+    return response_generator.response_body({"rooms": output})
 
 
 def handle_post(name, storey_id):
@@ -48,17 +47,21 @@ def handle_post(name, storey_id):
 
     storeys = session.query(StoreyDAO).get(storey_id)
     if storeys:
-        rooms = session.query(RoomDao) \
+        rooms = session.query(RoomDAO) \
             .filter(and_(RoomDAO.storey_id == storey_id,
-                         RoomDAO.name == name))
+                         RoomDAO.name == name)) \
+            .all()
+
         if not rooms:
             new_room = RoomDAO(name=name, storey_id=storey_id, deleted_at=None)
+            session.add(new_room)
 
             response_body = {
                 "id": str(new_room.id),
                 "name": new_room.name,
                 "storey_id": str(new_room.storey_id)
             }
+            session.commit()
             return response_generator.response_body(response_body)
 
         else:
