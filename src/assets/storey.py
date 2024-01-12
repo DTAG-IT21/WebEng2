@@ -1,14 +1,14 @@
+from sqlalchemy import and_
+
 import src.main.response_generator as response_generator
+from src.DAO.base import Session
 from src.DAO.building_dao import BuildingDAO
 from src.DAO.storey_dao import StoreyDAO
-from src.DAO.base import Session
-from sqlalchemy import and_
 
 session = Session()
 
 
 def handle_get(include_deleted, building_id):
-
     if building_id:
         if include_deleted == "true":
             storeys = session.query(StoreyDAO) \
@@ -17,7 +17,7 @@ def handle_get(include_deleted, building_id):
         else:
             storeys = session.query(StoreyDAO) \
                 .filter(and_(StoreyDAO.deleted_at.is_(None),
-                        StoreyDAO.building_id == building_id)) \
+                             StoreyDAO.building_id == building_id)) \
                 .all()
     else:
         if include_deleted == "true":

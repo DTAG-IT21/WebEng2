@@ -1,17 +1,17 @@
 import datetime
 
+from sqlalchemy import and_
+
 import src.main.response_generator as response_generator
+from src.DAO.base import Session
 from src.DAO.building_dao import BuildingDAO
 from src.DAO.room_dao import RoomDAO
 from src.DAO.storey_dao import StoreyDAO
-from src.DAO.base import Session
-from sqlalchemy import and_
 
 session = Session()
 
 
 def handle_get(storey_id):
-
     storey = session.query(StoreyDAO).get(storey_id)
 
     if not storey:
@@ -33,9 +33,9 @@ def handle_put(storey_id, name, building_id, deleted_at):
 
     # Check if storey name is already in use
     existing_storey = session.query(StoreyDAO) \
-    .filter(and_(StoreyDAO.name == name,
-                 StoreyDAO.building_id == building_id)) \
-    .first()
+        .filter(and_(StoreyDAO.name == name,
+                     StoreyDAO.building_id == building_id)) \
+        .first()
 
     if existing_storey and (str(existing_storey.id) != str(storey_id) or existing_storey.deleted_at is None):
         message = "storey name already used"

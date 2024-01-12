@@ -15,6 +15,7 @@ class RoomDAO(Base):
     deleted_at = Column(Date)
 
     def __init__(self, name, storey_id, deleted_at):
+        self.id = uuid.uuid4()
         self.name = name
         self.storey_id = storey_id
         self.deleted_at = deleted_at

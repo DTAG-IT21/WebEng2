@@ -15,6 +15,7 @@ class BuildingDAO(Base):
     deleted_at = Column(Date)
 
     def __init__(self, name, address, deleted_at):
+        self.id = uuid.uuid4()
         self.name = name
         self.address = address
         self.deleted_at = deleted_at

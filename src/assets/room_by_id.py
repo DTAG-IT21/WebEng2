@@ -1,17 +1,16 @@
 import datetime
 
+from sqlalchemy import and_
+
 import src.main.response_generator as response_generator
-from src.DAO.building_dao import BuildingDAO
+from src.DAO.base import Session
 from src.DAO.room_dao import RoomDAO
 from src.DAO.storey_dao import StoreyDAO
-from src.DAO.base import Session
-from sqlalchemy import and_
 
 session = Session()
 
 
 def handle_get(room_id):
-
     room = session.query(RoomDAO).get(room_id)
     if not room:
         message = "Room not found",

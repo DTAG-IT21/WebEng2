@@ -1,17 +1,14 @@
-import uuid
+from sqlalchemy import and_
 
 import src.main.response_generator as response_generator
-from src.DAO.building_dao import BuildingDAO
-from src.DAO.storey_dao import StoreyDAO
-from src.DAO.room_dao import RoomDAO
 from src.DAO.base import Session
-from sqlalchemy import and_
+from src.DAO.room_dao import RoomDAO
+from src.DAO.storey_dao import StoreyDAO
 
 session = Session()
 
 
 def handle_get(include_deleted, storey_id):
-
     if storey_id:
         if include_deleted == "true":
             rooms = session.query(RoomDAO) \
@@ -39,7 +36,6 @@ def handle_get(include_deleted, storey_id):
 
 
 def handle_post(name, storey_id):
-
     if not storey_id or not name:
         message = "Missing parameters"
         more_info = "Handed parameters not sufficient"
