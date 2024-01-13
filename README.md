@@ -1,78 +1,25 @@
-# WebEng2
-# Fragebogen zum Programmentwurf Webengineering 2 DHBW Karlsruhe TINF21B3
+# Web Engineering 2 TINF21B3
+## Team DTAG-IT21 (Leon Richter und Nico Merkel)
 
- Checkboxen (`[ ]`) bei Bedarf mit X befüllen `[X]`
+Dieses Projekt beinhaltet einen Python-Flask REST-Service für ein Gebäude-Verwaltungssystem, welcher in eine gegebene Kubernetes Kustomization Umgebung
+eingefügt werden kann.
+### Container Image
+Das Container-Image kann mit folgendem Befehl gepullt werden:
+~~~commandline
+docker pull ghcr.io/dtag-it21/webeng2:main
+~~~
+Um eigene Dienste (Datenbank, Keycloak) oder das Log-Level zu konfigurieren, 
+stehen folgende Umgebungsvariablen zur Verfügung:
 
-## Gruppeninformationen
+| Name                     | Beschreibung                                              | Default  |
+|--------------------------|-----------------------------------------------------------|----------|
+| POSTGRES_ASSETS_USER     | User für die Postgres Datenbank  	                        | postgres |
+| POSTGRES_ASSETS_PASSWORD | Passwort für die Postgres Datenbank  	                    | postgres |
+| POSTGRES_ASSETS_DBNAME   | Name der Postgres Datenbank  	                            | assets   |
+| POSTGRES_ASSETS_HOST     | Host der Postgres Datenbank  	                            | postgres |
+| POSTGRES_ASSETS_PORT     | Port der Postgres Datenbank  	                            | 5432     |
+| KEYCLOAK_HOST            | Host für die Keycloak Instanz    	                        | keycloak |
+| KEYCLOAK_REALM           | Realm der Keycloak Instanz   	                            | biletado |
+| LOGLEVEL                 | Log-Level der API (DEBUG, INFO, WARNING, ERROR, CRITICAL) | INFO     |
 
- Der Gruppenname hat keine weitere Bedeutung, macht mir aber eine Zuordnung bei der Korrektur einfacher.
- Es kann sein, dass der Name später noch weiterlebt, falls ich den Quellcode in die biletado-organisation verschiebe.
-
- See [fantasy name generators](httpswww.fantasynamegenerators.com)
-
-Gruppenname: Covfefe
-
-Gruppenteilnehmer
-
-- Leon Richter
-- Nico Merkel
-
-## Quellcode
-
- Nur ein Beispiel, ob und wie ihr auftrennen möchtet ist euch überlassen
-
-Links zu den Versionskontrollendpunkten
-
-- https://github.com/DTAG-IT21/WebEng2.git
-
-
-## Lizenz
-
- See https://github.com/DTAG-IT21/WebEng2/blob/main/LICENSE
-
-SPDX-License-Identifier und Dateinamen im Quellcode
-
-MIT License 
-File: LICENSE
-
-## Sprache und Framework
-
-
- Programmiersprache                     python                                                      
- Sprachversion                          3.11.5                                                      
- Version ist aktuell und wird gepflegt  [X]                                               
- Framework (FW)                         Flask                                  
- FW-Version                             v3.0.0                                                      
- FW-Version ist aktuell                 [X]                                                      
- Website zum FW                         [Flask](https://flask.palletsprojects.com/en/3.0.x/)                          
- Prepared statementsORM                FW-Integriert (SQLAlchemy)          
- ORM Version                            2.0                                                        
- ORM Version ist aktuell                [X]                                          
- Website zum ORM                        [SQLAlchemy](https://www.sqlalchemy.org/)           
-
-## Automatisierung
-
-Art der Automatisierung: GitHub Actions
-
-## Testautomatisierung
-
-geringfügige Unittests
-
-Wie sind die Ergebnisse einzusehen: In Code ausführbar unter main/src/test
-
-## Authentifizierung
-
- JWT wird berücksichtigt [ ]
- Signatur wird geprüft [ ]
-
-## Konfiguration und Dokumentation
-
- Dokumentation existiert in bedarfsgerechtem Umfang [ ]
- Konfigurationsparameter sind sinnvoll gewählt [ ]
- keine hardcoded Zugänge zu angeschlossenenen Systemen (URLs, Passwörter, Datenbanknamen, etc.) [X]
- Umgebungsvariablen und Konfurationsdateien sind gelistet und beschrieben [ ]
-
-## Logging
- Logsystem des Frameworks oder Bibliothek wurde genutzt [ ]
- Logs enthalten alle geforderten Werte [ ]
- LogLevel ist konfigurierbar [ ]
+Die Flask API innerhalb des Containers ist über Port 9000 erreichbar.
