@@ -1,14 +1,41 @@
 import os
 import uuid
-
+import logging
 import requests
+
 from flask import Flask
 from flask_restful import Resource, Api, request
 from jose import jwt
+from logging.config import dictConfig
 
 from src.assets import room, room_by_id, storey, storey_by_id, building, building_by_id
 import src.main.response_generator as response_generator
 import src.main.database as database
+
+
+loglevel = {
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+    "CRITICAL": logging.CRITICAL
+}
+
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'stream': 'ext://flask.logging.wsgi_errors_stream',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': loglevel.get(os.getenv("LOGLEVEL"), logging.INFO),
+        'handlers': ['wsgi'],
+    }
+})
 
 
 def create_app():
@@ -44,35 +71,49 @@ def create_app():
             include_deleted = request.args.get("include_deleted")
             storey_id = request.args.get("storey_id")
             if is_uuid(storey_id) or storey_id is None:
-                return room.handle_get(include_deleted, storey_id)
+                response = room.handle_get(include_deleted, storey_id)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid storey id"
                 more_info = "The given storey id is not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
         def post(self):
             data = request.json
+            app.logger.debug("Response: " + str(data))
             name = data.get("name")
             storey_id = data.get("storey_id")
             if is_uuid(storey_id):
-                return room.handle_post(name, storey_id)
+                response = room.handle_post(name, storey_id)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid storey id"
                 more_info = "The given storey id is not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
     class RoomById(Resource):
 
         def get(self, room_id):
             if is_uuid(room_id):
-                return room_by_id.handle_get(room_id)
+                response = room_by_id.handle_get(room_id)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid room id"
                 more_info = "The given room id is not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
         def put(self, room_id):
             data = request.json
+            app.logger.debug("Response: " + str(data))
             name = data.get("name")
             storey_id = data.get("storey_id")
             if is_uuid(room_id) and is_uuid(storey_id):
@@ -80,19 +121,27 @@ def create_app():
                     deleted_at = None
                 else:
                     deleted_at = 1
-                return room_by_id.handle_put(room_id, name, storey_id, deleted_at)
+                response = room_by_id.handle_put(room_id, name, storey_id, deleted_at)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid room id or storey id"
                 more_info = "The given room id or storey id are not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
         def delete(self, room_id):
             if is_uuid(room_id):
-                return room_by_id.handle_delete(room_id)
+                response = room_by_id.handle_delete(room_id)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid room id"
                 more_info = "The given room id is not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
     class Storey(Resource):
 
@@ -100,35 +149,49 @@ def create_app():
             include_deleted = request.args.get("include_deleted")
             building_id = request.args.get("building_id")
             if is_uuid(building_id):
-                return storey.handle_get(include_deleted, building_id)
+                response = storey.handle_get(include_deleted, building_id)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid building id"
                 more_info = "The given building id is not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
         def post(self):
             data = request.json
+            app.logger.debug("Response: " + str(data))
             name = data.get("name")
             building_id = data.get("building_id")
             if is_uuid(building_id):
-                return storey.handle_post(name, building_id)
+                response = storey.handle_post(name, building_id)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid building id"
                 more_info = "The given building id is not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
     class StoreyById(Resource):
 
         def get(self, storey_id):
             if is_uuid(storey_id):
-                return storey_by_id.handle_get(storey_id)
+                response = storey_by_id.handle_get(storey_id)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid storey id"
                 more_info = "The given storey id is not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
         def put(self, storey_id):
             data = request.json
+            app.logger.debug("Response: " + str(data))
             name = data.get("name")
             building_id = data.get("building_id")
             if is_uuid(storey_id) and is_uuid(building_id):
@@ -136,44 +199,62 @@ def create_app():
                     deleted_at = None
                 else:
                     deleted_at = 1
-                return storey_by_id.handle_put(storey_id, name, building_id, deleted_at)
+                response = storey_by_id.handle_put(storey_id, name, building_id, deleted_at)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid storey id or building_id"
                 more_info = "The given storey id or building_id are not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
         def delete(self, storey_id):
             if is_uuid(storey_id):
-                return storey_by_id.handle_delete(storey_id)
+                response = storey_by_id.handle_delete(storey_id)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid storey id"
                 more_info = "The given storey id is not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
     class Building(Resource):
 
         def get(self):
             include_deleted = request.args.get("include_deleted")
-            return building.handle_get(include_deleted)
+            response = building.handle_get(include_deleted)
+            app.logger.debug("Response: " + str(response.json))
+            return response
 
         def post(self):
             data = request.json
+            app.logger.debug("Response: " + str(data))
             name = data.get("name")
             address = data.get("address")
-            return building.handle_post(name, address)
+            response = building.handle_post(name, address)
+            app.logger.debug("Response: " + str(response.json))
+            return response
 
     class BuildingById(Resource):
 
         def get(self, building_id):
             if is_uuid(building_id):
-                return building_by_id.handle_get(building_id)
+                response = building_by_id.handle_get(building_id)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid building id"
                 more_info = "The given building id is not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
         def put(self, building_id):
             data = request.json
+            app.logger.debug("Response: " + str(data))
             name = data.get("name")
             address = data.get("address")
             if is_uuid(building_id):
@@ -181,19 +262,27 @@ def create_app():
                     deleted_at = None
                 else:
                     deleted_at = 1
-                return building_by_id.handle_put(building_id, name, address, deleted_at)
+                response = building_by_id.handle_put(building_id, name, address, deleted_at)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid building id"
                 more_info = "The given building id is not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
         def delete(self, building_id):
             if is_uuid(building_id):
-                return building_by_id.handle_delete(building_id)
+                response = building_by_id.handle_delete(building_id)
+                app.logger.debug("Response: " + str(response.json))
+                return response
             else:
                 message = "Invalid building id"
                 more_info = "The given building_id is not in uuid format"
-                return response_generator.error_response(message, more_info)
+                response = response_generator.error_response(message, more_info)
+                app.logger.debug("Response: " + str(response.json))
+                return response
 
     @app.route('/api/v2/assets/status', methods=['GET'])
     def status():
@@ -204,6 +293,7 @@ def create_app():
             ],
             "api_version": "2.0.0"
         }
+        app.logger.debug("Response: " + str(response_generator.response_body(response, 200).json))
         return response_generator.response_body(response, 200)
 
     @app.route('/api/v2/assets/health/ready', methods=['GET'])
@@ -211,16 +301,19 @@ def create_app():
         response = {
             "ready": True
         }
+        app.logger.debug("Response: " + str(response_generator.response_body(response, 200).json))
         return response_generator.response_body(response, 200)
 
     @app.route('/api/v2/assets/health/live', methods=['GET'])
     def live():
         if database.test_connection():
+            app.logger.debug("Response: " + str(response_generator.response_body({'live': True}, 200).json))
             return response_generator.response_body({'live': True}, 200)
         else:
             response = {
                 'live': False,
             }
+            app.logger.debug("Response: " + str(response_generator.response_body(response, 500).json))
             return response_generator.response_body(response, 500)
 
     @app.route('/api/v2/assets/health', methods=['GET'])
@@ -237,8 +330,10 @@ def create_app():
         }
 
         if not is_ready or not is_live:
+            app.logger.debug("Response: " + str(response_generator.response_body(response, 500).json))
             return response_generator.response_body(response, 500)
         else:
+            app.logger.debug("Response: " + str(response_generator.response_body(response, 200).json))
             return response_generator.response_body(response, 200)
 
     api.add_resource(Room, '/api/v2/assets/rooms')
@@ -261,5 +356,5 @@ def is_uuid(candidate):
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, host="localhost", port=9000)
+    app.run(debug=False, host="localhost", port=9000)
 

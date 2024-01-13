@@ -46,3 +46,9 @@ jobs:
           flavor: |
             latest=true
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: summary
+          path: .github/artifacts/summary.md
