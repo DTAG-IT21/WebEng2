@@ -1,9 +1,0 @@
-POST http://localhost:9000/api/v2/assets/rooms
-Content-Type: application/json
-Accept: application/json
-
-{
-  "name": "207",
-  "storey_id": "ef164ecd-c384-4423-9627-5018389d2791"
-}
-
