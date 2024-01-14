@@ -22,4 +22,5 @@ stehen folgende Umgebungsvariablen zur Verfügung:
 | KEYCLOAK_REALM           | Realm der Keycloak Instanz   	                            | biletado |
 | LOGLEVEL                 | Log-Level der API (DEBUG, INFO, WARNING, ERROR, CRITICAL) | INFO     |
 
+Das Log-Level kann zusätzlich über /api/v2/assets/log/&lt;string:level> zur Laufzeit angepasst werden.
 Die Flask API innerhalb des Containers ist über Port 9000 erreichbar.

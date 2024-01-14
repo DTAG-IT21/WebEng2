@@ -336,6 +336,17 @@ def create_app():
             app.logger.debug("Response: " + str(response_generator.response_body(response, 200).json))
             return response_generator.response_body(response, 200)
 
+    @app.route('/api/v2/assets/log/<string:level>', methods=['GET'])
+    def log_level(level):
+        if level not in loglevel:
+            level = app.logger.getEffectiveLevel()
+        app.logger.setLevel(loglevel.get(level, level))
+        app.logger.critical("LogLevel set to: " + level)
+        response = {
+            "message": "LogLevel set to: " + level
+        }
+        return response_generator.response_body(response, 200)
+
     api.add_resource(Room, '/api/v2/assets/rooms')
     api.add_resource(RoomById, '/api/v2/assets/rooms/<string:room_id>')
     api.add_resource(Storey, '/api/v2/assets/storeys')
