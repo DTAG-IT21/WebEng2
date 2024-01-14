@@ -69,7 +69,7 @@ def create_app():
 
         def get(self):
             include_deleted = request.args.get("include_deleted")
-            storey_id = request.args.get("storey_id")
+            storey_id = request.args.get("storey_id", 1)
             if is_uuid(storey_id) or storey_id is None:
                 response = room.handle_get(include_deleted, storey_id)
                 app.logger.debug("Response: " + str(response.json))
@@ -83,7 +83,7 @@ def create_app():
 
         def post(self):
             data = request.json
-            app.logger.debug("Response: " + str(data))
+            app.logger.debug("Request: " + str(data))
             name = data.get("name")
             storey_id = data.get("storey_id")
             if is_uuid(storey_id):
@@ -113,7 +113,7 @@ def create_app():
 
         def put(self, room_id):
             data = request.json
-            app.logger.debug("Response: " + str(data))
+            app.logger.debug("Request: " + str(data))
             name = data.get("name")
             storey_id = data.get("storey_id")
             if is_uuid(room_id) and is_uuid(storey_id):
@@ -147,7 +147,7 @@ def create_app():
 
         def get(self):
             include_deleted = request.args.get("include_deleted")
-            building_id = request.args.get("building_id")
+            building_id = request.args.get("building_id", 1)
             if is_uuid(building_id):
                 response = storey.handle_get(include_deleted, building_id)
                 app.logger.debug("Response: " + str(response.json))
@@ -161,7 +161,7 @@ def create_app():
 
         def post(self):
             data = request.json
-            app.logger.debug("Response: " + str(data))
+            app.logger.debug("Request: " + str(data))
             name = data.get("name")
             building_id = data.get("building_id")
             if is_uuid(building_id):
@@ -191,7 +191,7 @@ def create_app():
 
         def put(self, storey_id):
             data = request.json
-            app.logger.debug("Response: " + str(data))
+            app.logger.debug("Request: " + str(data))
             name = data.get("name")
             building_id = data.get("building_id")
             if is_uuid(storey_id) and is_uuid(building_id):
@@ -231,7 +231,7 @@ def create_app():
 
         def post(self):
             data = request.json
-            app.logger.debug("Response: " + str(data))
+            app.logger.debug("Request: " + str(data))
             name = data.get("name")
             address = data.get("address")
             response = building.handle_post(name, address)
@@ -254,7 +254,7 @@ def create_app():
 
         def put(self, building_id):
             data = request.json
-            app.logger.debug("Response: " + str(data))
+            app.logger.debug("Request: " + str(data))
             name = data.get("name")
             address = data.get("address")
             if is_uuid(building_id):
