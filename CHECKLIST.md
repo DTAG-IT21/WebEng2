@@ -13,7 +13,8 @@ Gruppenteilnehmer:
 
 Links zu den Versionskontrollendpunkten:
 
-- https://github.com/DTAG-IT21/WebEng2
+- https://github.com/DTAG-IT21/WebEng2 --> Quellcode
+- ghcr.io/dtag-it21/webeng2:main --> Container-Image
 
 ## Lizenz
 
@@ -62,7 +63,7 @@ jedoch wird kein Gebrauch davon gemacht, da er nicht funktioniert.
 
 ## Logging
 * Logsystem des Frameworks oder Bibliothek wurde genutzt: [X]
-* Logs enthalten alle geforderten Werte: [ ]
+* Logs enthalten alle geforderten Werte: [X]
 * LogLevel ist konfigurierbar: [X]
 
 Für den LogLevel gibt es die standardmäßigen fünf Stufen (DEBUG, INFO, WARNING, ERROR, CRITICAL).  
