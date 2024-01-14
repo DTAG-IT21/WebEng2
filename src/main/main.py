@@ -69,7 +69,7 @@ def create_app():
 
         def get(self):
             include_deleted = request.args.get("include_deleted")
-            storey_id = request.args.get("storey_id", 1)
+            storey_id = request.args.get("storey_id", "1")
             if is_uuid(storey_id) or storey_id is None:
                 response = room.handle_get(include_deleted, storey_id)
                 app.logger.debug("Response: " + str(response.json))
@@ -147,7 +147,7 @@ def create_app():
 
         def get(self):
             include_deleted = request.args.get("include_deleted")
-            building_id = request.args.get("building_id", 1)
+            building_id = request.args.get("building_id", "1")
             if is_uuid(building_id):
                 response = storey.handle_get(include_deleted, building_id)
                 app.logger.debug("Response: " + str(response.json))
