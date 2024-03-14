@@ -367,5 +367,5 @@ def is_uuid(candidate):
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=False, host="localhost", port=9000)
+    app.run(debug=False, host="0.0.0.0", port=9000)
 
